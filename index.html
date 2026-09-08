@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İsteriz - Tersine İlan Pazaryeri</title>
+    <!-- Tailwind CSS (Görsel Tasarım İçin) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide İkonlar -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 pb-12">
+
+    <!-- 1. ÜST BAR (HEADER) -->
+    <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            
+            <!-- LOGO & SOL ÜST MOD TOGGLE -->
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-md">
+                        İ
+                    </div>
+                    <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent hidden sm:inline">
+                        isteriz
+                    </span>
+                </div>
+
+                <!-- SOL ÜST MOD DEĞİŞTİRİCİ -->
+                <div class="bg-slate-100 p-1.5 rounded-2xl flex items-center border border-slate-200 shadow-inner">
+                    <button id="btn-mode-buy" onclick="setMode('BUY')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                        <span>Alıcı Modu <span class="opacity-75 hidden md:inline">(Arananlar)</span></span>
+                    </button>
+
+                    <button id="btn-mode-sell" onclick="setMode('SELL')" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 text-slate-600 hover:text-slate-900">
+                        <i data-lucide="tag" class="w-4 h-4"></i>
+                        <span>Satıcı Modu <span class="opacity-75 hidden md:inline">(Satılıklar)</span></span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- İLAN VER BUTONU -->
+            <button onclick="openModal()" id="btn-add-listing" class="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm shadow-lg transition-all bg-indigo-600 hover:bg-indigo-700">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                <span id="txt-add-btn">Alım İlanı Ver (Arıyorum)</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- 2. BİLGİLENDİRME BANTI -->
+    <section id="hero-banner" class="py-6 px-4 border-b bg-indigo-900 text-indigo-100 border-indigo-800 transition-colors">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider opacity-80 mb-1">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                    <span id="banner-tag">Tersine Pazaryeri Aktif</span>
+                </div>
+                <h1 id="banner-title" class="text-2xl font-black text-white">
+                    🎯 Alıcılar Bütçesini Koydu, Satıcılardan Teklif Bekliyor
+                </h1>
+                <p id="banner-desc" class="text-sm opacity-90 mt-1 max-w-2xl">
+                    Elinizde ihtiyacınız olmayan bir ürün mü var? Aşağıdaki alıcılardan uygun bütçeli olana hemen teklif verin ve anında nakde çevirin.
+                </p>
+            </div>
+
+            <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/10 flex items-center gap-3">
+                <i data-lucide="shield-check" class="w-8 h-8 text-amber-400 shrink-0"></i>
+                <div class="text-xs">
+                    <div class="font-bold text-white">Spam & Çöplük Koruması</div>
+                    <div class="opacity-80">Piyasa altı gerçek dışı bütçeler engellenir.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. FİLTRELER VE ARAMA -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
+            <div class="relative w-full md:w-96">
+                <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="search-input" onkeyup="renderListings()" placeholder="Aranan ürünlerde ara..." class="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
+            </div>
+
+            <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+                <button onclick="setCategory('Tümü')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white">Tümü</button>
+                <button onclick="setCategory('Telefon')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">Telefon</button>
+                <button onclick="setCategory('Bilgisayar')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">Bilgisayar</button>
+                <button onclick="setCategory('Vasıta')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">Vasıta</button>
+                <button onclick="setCategory('Oyun Konsolu')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200">Oyun Konsolu</button>
+            </div>
+        </div>
+
+        <!-- 4. İLAN KARTLARI LİSTESİ -->
+        <div id="listings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dinamik İlanlar Buraya Gelecek -->
+        </div>
+    </main>
+
+    <!-- 5. İLAN VERME MODALI (PENCERESİ) -->
+    <div id="modal-add" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modal-add-title" class="text-xl font-bold text-slate-900">🎯 Yeni Alım İlanı Oluştur</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x-circle" class="w-6 h-6"></i></button>
+            </div>
+
+            <div id="validation-error" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-medium"></div>
+
+            <form onsubmit="handleCreateListing(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kategori</label>
+                    <select id="form-category" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold">
+                        <option value="Telefon">Telefon (Min: 2.000 TL)</option>
+                        <option value="Bilgisayar">Bilgisayar (Min: 5.000 TL)</option>
+                        <option value="Vasıta">Vasıta (Min: 50.000 TL)</option>
+                        <option value="Oyun Konsolu">Oyun Konsolu (Min: 3.000 TL)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">İlan Başlığı</label>
+                    <input type="text" id="form-title" placeholder="Örn: Temiz Garantili iPhone 13 Pro Arıyorum" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" required>
+                </div>
+
+                <div>
+                    <label id="lbl-price" class="block text-xs font-bold text-slate-700 mb-1">Maksimum Ayrılan Bütçe (TL)</label>
+                    <input type="number" id="form-price" placeholder="Bütçenizi girin..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold" required>
+                    <span class="text-[11px] text-slate-400 mt-1 block">*Piyasa çöp/spam ilanlarını önlemek için taban bütçe uygulanır.</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Şehir</label>
+                    <select id="form-city" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold">
+                        <option value="İstanbul">İstanbul</option>
+                        <option value="Ankara">Ankara</option>
+                        <option value="İzmir">İzmir</option>
+                        <option value="Bursa">Bursa</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Detaylı Açıklama</label>
+                    <textarea id="form-desc" rows="3" placeholder="Aradığınız/sattığınız ürün hakkındaki detayları yazın..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm" required></textarea>
+                </div>
+
+                <button type="submit" id="btn-submit-listing" class="w-full py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 text-sm">
+                    İlanı Yayınla
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT KODLARI (SİSTEMİN ÇALIŞMA MANTIĞI) -->
+    <script>
+        // KATEGORİ SPAM / TABAN BÜTÇE SINIRLARI
+        const CATEGORY_LIMITS = {
+            'Telefon': 2000,
+            'Bilgisayar': 5000,
+            'Vasıta': 50000,
+            'Oyun Konsolu': 3000
+        };
+
+        // İLK YÜKLENEN MANTIKLI İLANLAR
+        let listings = [
+            { id: '1', type: 'BUY', title: 'M1/M2 MacBook Air 16GB RAM Arıyorum', category: 'Bilgisayar', price: 28000, city: 'İstanbul', offers: 3, desc: 'Yazılım geliştirme için temiz, tamirsiz MacBook Air arıyorum. Bütçem nakit hazırdır.' },
+            { id: '2', type: 'BUY', title: 'Temiz iPhone 13 / 14 (Garantili)', category: 'Telefon', price: 24000, city: 'Ankara', offers: 5, desc: 'Kutulu faturalı, ekranda derin çizik olmayan cihazlar teklif versin lütfen.' },
+            { id: '3', type: 'SELL', title: 'Sony PlayStation 5 Slim 1TB + 2. Kol', category: 'Oyun Konsolu', price: 19500, city: 'İzmir', offers: 2, desc: 'Eurasia garantili, çok az kullanıldı. Kutulu ve faturalı.' }
+        ];
+
+        let currentMode = 'BUY';
+        let currentCategory = 'Tümü';
+
+        // SAYFA YÜKLENDİĞİNDE
+        window.onload = function() {
+            lucide.createIcons();
+            renderListings();
+        };
+
+        // MOD DEĞİŞTİRME (ALICI / SATICI)
+        function setMode(mode) {
+            currentMode = mode;
+            const btnBuy = document.getElementById('btn-mode-buy');
+            const btnSell = document.getElementById('btn-mode-sell');
+            const hero = document.getElementById('hero-banner');
+            const addBtn = document.getElementById('btn-add-listing');
+
+            if (mode === 'BUY') {
+                btnBuy.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md";
+                btnSell.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
+                hero.className = "py-6 px-4 border-b bg-indigo-900 text-indigo-100 border-indigo-800 transition-colors";
+                addBtn.className = "flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm shadow-lg transition-all bg-indigo-600 hover:bg-indigo-700";
+                
+                document.getElementById('banner-tag').innerText = "Tersine Pazaryeri Aktif";
+                document.getElementById('banner-title').innerText = "🎯 Alıcılar Bütçesini Koydu, Satıcılardan Teklif Bekliyor";
+                document.getElementById('banner-desc').innerText = "Elinizde ihtiyacınız olmayan bir ürün mü var? Aşağıdaki alıcılardan uygun bütçeli olana hemen teklif verin.";
+                document.getElementById('txt-add-btn').innerText = "Alım İlanı Ver (Arıyorum)";
+            } else {
+                btnSell.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 bg-emerald-600 text-white shadow-md";
+                btnBuy.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 text-slate-600 hover:text-slate-900";
+                hero.className = "py-6 px-4 border-b bg-emerald-900 text-emerald-100 border-emerald-800 transition-colors";
+                addBtn.className = "flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm shadow-lg transition-all bg-emerald-600 hover:bg-emerald-700";
+                
+                document.getElementById('banner-tag').innerText = "Klasik Pazaryeri Aktif";
+                document.getElementById('banner-title').innerText = "🛍️ Satıcıların İlanları — Bütçenize Göre Teklif Yapın";
+                document.getElementById('banner-desc').innerText = "Satılıktaki ürünleri inceleyin, doğrudan alım yapın veya ilan sahibine karşı teklifinizi iletin.";
+                document.getElementById('txt-add-btn').innerText = "Satış İlanı Ver (Satıyorum)";
+            }
+            renderListings();
+        }
+
+        // KATEGORİ FİLTRELEME
+        function setCategory(cat) {
+            currentCategory = cat;
+            renderListings();
+        }
+
+        // İLANLARI EKRANA BASTIRMA
+        function renderListings() {
+            const grid = document.getElementById('listings-grid');
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+
+            const filtered = listings.filter(item => {
+                const matchMode = item.type === currentMode;
+                const matchCat = currentCategory === 'Tümü' || item.category === currentCategory;
+                const matchSearch = item.title.toLowerCase().includes(searchVal) || item.desc.toLowerCase().includes(searchVal);
+                return matchMode && matchCat && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full bg-white rounded-2xl border border-dashed border-slate-300 p-12 text-center">
+                        <i data-lucide="alert-circle" class="w-12 h-12 text-slate-400 mx-auto mb-3"></i>
+                        <h3 class="text-lg font-bold text-slate-800">İlan Bulunamadı</h3>
+                        <p class="text-sm text-slate-500 mt-1">Bu kritere uygun ilan henüz girilmemiş.</p>
+                    </div>`;
+            } else {
+                grid.innerHTML = filtered.map(item => `
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[11px] font-extrabold px-2.5 py-1 rounded-md uppercase ${item.type === 'BUY' ? 'bg-indigo-50 text-indigo-700' : 'bg-emerald-50 text-emerald-700'}">
+                                    ${item.category}
+                                </span>
+                                <span class="text-xs text-slate-400">${item.city}</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-base mb-2">${item.title}</h3>
+                            <p class="text-xs text-slate-600 line-clamp-2 mb-4">${item.desc}</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 border-t border-slate-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-slate-400 block">${item.type === 'BUY' ? 'Maks Bütçe' : 'Satış Fiyatı'}</span>
+                                <span class="text-lg font-black text-slate-900">${item.price.toLocaleString('tr-TR')} TL</span>
+                            </div>
+                            <button onclick="alert('Teklifiniz başarıyla ilan sahibine iletildi!')" class="px-4 py-2 rounded-xl text-xs font-bold text-white ${item.type === 'BUY' ? 'bg-indigo-600' : 'bg-emerald-600'}">
+                                ${item.type === 'BUY' ? 'Satış Teklifi Ver' : 'Teklif Yap'} (${item.offers})
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        }
+
+        // MODAL AÇ/KAPAT
+        function openModal() {
+            document.getElementById('modal-add').classList.remove('hidden');
+            document.getElementById('modal-add-title').innerText = currentMode === 'BUY' ? '🎯 Yeni Alım İlanı Oluştur' : '🛍️ Yeni Satış İlanı Oluştur';
+            document.getElementById('lbl-price').innerText = currentMode === 'BUY' ? 'Maksimum Ayrılan Bütçe (TL)' : 'Satış Fiyatı (TL)';
+            document.getElementById('btn-submit-listing').className = currentMode === 'BUY' ? 'w-full py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 text-sm' : 'w-full py-3 rounded-xl font-bold text-white bg-emerald-600 hover:bg-emerald-700 text-sm';
+        }
+        function closeModal() {
+            document.getElementById('modal-add').classList.add('hidden');
+            document.getElementById('validation-error').classList.add('hidden');
+        }
+
+        // İLAN EKLEME VE SPAM KONTROLÜ
+        function handleCreateListing(e) {
+            e.preventDefault();
+            const category = document.getElementById('form-category').value;
+            const title = document.getElementById('form-title').value;
+            const price = parseFloat(document.getElementById('form-price').value);
+            const city = document.getElementById('form-city').value;
+            const desc = document.getElementById('form-desc').value;
+            const errDiv = document.getElementById('validation-error');
+
+            const minLimit = CATEGORY_LIMITS[category];
+            if (price < minLimit) {
+                errDiv.innerText = `⚠️ Spam Koruması: ${category} kategorisi için en düşük bütçe/fiyat ${minLimit.toLocaleString('tr-TR')} TL olmalıdır.`;
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            listings.unshift({
+                id: Date.now().toString(),
+                type: currentMode,
+                title: title,
+                category: category,
+                price: price,
+                city: city,
+                offers: 0,
+                desc: desc
+            });
+
+            closeModal();
+            renderListings();
+            alert('İlanınız başarıyla eklendi!');
+        }
+    </script>
+</body>
+</html>
